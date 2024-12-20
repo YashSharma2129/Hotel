@@ -151,7 +151,7 @@ const SearchRooms = () => {
                 </center>
 
                 <center>
-                    <div class="dropdown">
+                    <div className="dropdown">
 
 
                         {/* ROOM TYPE (all , single , double , family , presedential) */}

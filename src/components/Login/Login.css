@@ -68,11 +68,13 @@
 
   
 @media only screen and (max-width: 760px) {
-    .login-form-input-fields{
-        width: 70% !important;
+    .login-form-login-div {
+        width: 90%;
+        padding: 20px !important;
     }
-    .login-form-login-div{
-        width: 80%;
+    
+    .login-form-input-fields {
+        width: 100% !important;
     }
     .login-form-submit-btn{
         height: 40px;

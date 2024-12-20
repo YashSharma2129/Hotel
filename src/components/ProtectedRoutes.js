@@ -1,17 +1,16 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
-import { useUserAuth } from "../Context/UserAuthContext";
 
+import { Navigate, useLocation } from "react-router-dom";
+import { useUserAuth } from "../Context/UserAuthContext";
 
 const ProtectedRoute = ({ children }) => {
   const { user } = useUserAuth();
+  const location = useLocation();
 
   if (!user) {
-    return <>
-      <Navigate to="/" />
-      {alert("Please login first to book the room !!")}
-    </>
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
+
   return children;
 };
 

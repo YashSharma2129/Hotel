@@ -1,95 +1,130 @@
-import React from 'react'
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import './Signup.css';
-// import { authentication } from '../../config/firebase-config';
-import { Link } from 'react-router-dom';
-// import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-// import { getDatabase } from "firebase/database";
-import { getDatabase, ref, set } from "firebase/database";
-import { useNavigate } from 'react-router';
-import * as firebase from '../../config/firebase-config'
+import React, { useState } from "react";
+import { TextField, Button } from "@mui/material";
+import { useNavigate } from "react-router";
 import { useUserAuth } from "../../Context/UserAuthContext";
 import { Alert } from "react-bootstrap";
-import { useState } from 'react'
+import { getDatabase, ref, set } from "firebase/database";
 import MyFooter from "../Footer/MyFooter";
 import MyCopyright from "../Copyright/MyCopyright";
+import "./Signup.css";
 
 const Signup = () => {
+  const [userData, setUserData] = useState({
+    fullname: "",
+    username: "",
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  let navigate = useNavigate();
+  const { signUp } = useUserAuth();
+  const db = getDatabase();
 
-    const [userData, setUserData] = React.useState({
-        fullname: "",
-        username: "",
-        email: "",
-        password: ""
-    })
+  const postUserData = (event) => {
+    const { name, value } = event.target;
+    setUserData({ ...userData, [name]: value });
+  };
 
-    let name, value;
-
-    function postUserData(event) {
-        name = event.target.name
-        value = event.target.value
-        setUserData({ ...userData, [name]: value })
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (
+      !userData.username ||
+      !userData.password ||
+      !userData.email ||
+      !userData.fullname
+    ) {
+      setError("Please fill in all fields");
+      return;
     }
+    setError("");
+    try {
+      // Sign up the user
+      await signUp(
+        userData.email,
+        userData.password,
+        userData.fullname,
+        userData.username
+      );
 
-    const db = getDatabase();
-    let navigate = useNavigate()
-    const [error, setError] = useState("");
-    const { signUp } = useUserAuth();
+      // Add user data to Firebase Realtime Database
+      const userRef = ref(db, "users/" + userData.username);
+      await set(userRef, {
+        fullname: userData.fullname,
+        email: userData.email,
+        username: userData.username,
+      });
 
+      navigate("/"); // Redirect to the home page
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (userData.username == "" || userData.password == "" || userData.email == "" || userData.fullname == "") {
-            alert("Please fill the input fields")
-        }
-        else {
-            setError("");
-            try {
-                await signUp(userData.email, userData.password, userData.fullname, userData.username);
-                navigate("/");
-            } catch (err) {
-                setError(err.message);
-                console.log(err.message)
-            }
-        }
-    };
-
-
-
-    return (
-        <>
-            <div className='signup-form-main'>
-
-                <div className='signup-form-signup-div'>
-                    <h1 className='signup-form-signup-heading'>Sign Up</h1>
-                    {error && <Alert variant="danger">{error}</Alert>}
-                    <center>
-                        <div>
-                            <TextField type="name" id="standard-basic" label="Fullname" variant="standard" className="signup-form-input-fields" name="fullname" value={userData.fullname} onChange={(event) => postUserData(event)} />
-                        </div>
-                        <div>
-                            <TextField typer="username" id="standard-basic" label="Username" variant="standard" className="signup-form-input-fields" name="username" value={userData.username} onChange={(event) => postUserData(event)} />
-                        </div>
-                        <div>
-                            <TextField type="email" id="standard-basic" label="Email" variant="standard" className="signup-form-input-fields " name="email" value={userData.email} onChange={(event) => postUserData(event)} />
-                        </div>
-                        <div>
-                            <TextField type="password" id="standard-basic" label="Password" variant="standard" className="signup-form-input-fields " name="password" value={userData.password} onChange={(event) => postUserData(event)} />
-                        </div>
-                        {/* <div>
-                        <TextField type="password" id="standard-basic" label="Confirm Password" variant="standard" className="signup-form-input-fields " name="cpassword" value={userData.password} onChange={(event) => postUserData(event)} />
-                    </div> */}
-                        <Button variant="contained" className="signup-form-submit-btn" onClick={(e) => handleSubmit(e)}>Sign Up</Button>
-                    </center>
-                </div>
-
+  return (
+    <>
+      <div className="signup-form-main">
+        <div className="signup-form-signup-div">
+          <h1 className="signup-form-signup-heading">Sign Up</h1>
+          {error && <Alert variant="danger">{error}</Alert>}
+          <center>
+            <div>
+              <TextField
+                type="text"
+                label="Fullname"
+                variant="standard"
+                className="signup-form-input-fields"
+                name="fullname"
+                value={userData.fullname}
+                onChange={postUserData}
+              />
             </div>
-            <MyFooter />
-            <MyCopyright/>
-        </>
-    )
-}
+            <div>
+              <TextField
+                type="text"
+                label="Username"
+                variant="standard"
+                className="signup-form-input-fields"
+                name="username"
+                value={userData.username}
+                onChange={postUserData}
+              />
+            </div>
+            <div>
+              <TextField
+                type="email"
+                label="Email"
+                variant="standard"
+                className="signup-form-input-fields"
+                name="email"
+                value={userData.email}
+                onChange={postUserData}
+              />
+            </div>
+            <div>
+              <TextField
+                type="password"
+                label="Password"
+                variant="standard"
+                className="signup-form-input-fields"
+                name="password"
+                value={userData.password}
+                onChange={postUserData}
+              />
+            </div>
+            <Button
+              variant="contained"
+              className="signup-form-submit-btn"
+              onClick={handleSubmit}
+            >
+              Sign Up
+            </Button>
+          </center>
+        </div>
+      </div>
+      <MyFooter />
+      <MyCopyright />
+    </>
+  );
+};
 
-export default Signup
+export default Signup;

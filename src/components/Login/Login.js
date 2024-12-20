@@ -3,33 +3,37 @@ import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import google from "../../imgs/google.png";
-import { useUserAuth } from "../../Context/UserAuthContext";
 import facebook from "../../imgs/facebook.png";
-import "./Login.css";
-import { Alert } from "react-bootstrap";
+import { useUserAuth } from "../../Context/UserAuthContext";
+import { Alert, Snackbar } from "@mui/material";
 import MyFooter from "../Footer/MyFooter";
 import MyCopyright from "../Copyright/MyCopyright";
+import "./Login.css";
 
-const Login = ({ posts }) => {
+const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { logIn, googleSignIn } = useUserAuth();
-  const { fbLogIn, facebookSignIn } = useUserAuth();
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+
+  const { logIn, googleSignIn, facebookSignIn } = useUserAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    if (email !== "" && password !== "") {
-      e.preventDefault();
+    e.preventDefault();
+    if (email && password) {
       setError("");
       try {
         await logIn(email, password);
         navigate("/");
       } catch (err) {
-        setError(err.message);
+        setSnackbarMessage("Login failed. Please check your credentials.");
+        setOpenSnackbar(true);
       }
     } else {
-      setError("Please fill the input fields");
+      setSnackbarMessage("Please fill in both email and password.");
+      setOpenSnackbar(true);
     }
   };
 
@@ -53,89 +57,79 @@ const Login = ({ posts }) => {
     }
   };
 
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
+
   return (
-    <>
-      <div className="login-form-main">
-        <div className="login-form-login-div">
-          <h1 className="login-form-login-heading">Log In</h1>
-          {error && <Alert variant="danger">{error}</Alert>}
-          <center>
-            <div>
-              <TextField
-                type="email"
-                id="standard-basic"
-                label="Email"
-                variant="standard"
-                className="login-form-input-fields"
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div>
-              <TextField
-                type="password"
-                id="standard-basic"
-                label="Password"
-                variant="standard"
-                className="login-form-input-fields"
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <Button
-              variant="contained"
-              className="login-form-submit-btn"
-              onClick={(e) => handleSubmit(e)}
-            >
-              Log In
-            </Button>
-            <div className="design">
-              <hr />
-              <b>OR</b>
-            </div>
-            <center>
-              <Button
-                variant="contained"
-                className="google"
-                onClick={(e) => handleGoogleSignIn(e)}
-              >
-                <img src={google} /> Log In with Google+
-              </Button>
-              <br />
-              <Button
-                variant="contained"
-                className="facebook"
-                onClick={(e) => handleFacebookSignIn(e)}
-              >
-                <img src={facebook} /> Log In with Facebook
-              </Button>
-            </center>
-          </center>
-        </div>
+    <div className="login-form-main">
+      <div className="login-form-login-div">
+        <h1 className="login-form-login-heading">Log In</h1>
+        <form onSubmit={handleSubmit}>
+          <TextField
+            type="email"
+            label="Email"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <TextField
+            type="password"
+            label="Password"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <Button
+            variant="contained"
+            type="submit"
+            fullWidth
+            className="login-form-submit-btn"
+          >
+            Log In
+          </Button>
+          <div className="design">
+            <hr />
+            <b>OR</b>
+          </div>
+          <Button
+            variant="contained"
+            className="google"
+            fullWidth
+            onClick={handleGoogleSignIn}
+            startIcon={<img src={google} alt="Google logo" />}
+          >
+            Log In with Google
+          </Button>
+          <Button
+            variant="contained"
+            className="facebook"
+            fullWidth
+            onClick={handleFacebookSignIn}
+            startIcon={<img src={facebook} alt="Facebook logo" />}
+          >
+            Log In with Facebook
+          </Button>
+        </form>
       </div>
-      <div>
-        <h2>Posts from MongoDB:</h2>
-        <div>
-          {posts &&
-            posts.map((post) => (
-              <div key={post._id}>
-                <h2>{post.title}</h2>
-                <p>{post.content}</p>
-              </div>
-            ))}
-        </div>
-      </div>
+
       <MyFooter />
       <MyCopyright />
-    </>
+
+      {/* Snackbar for error or success messages */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        message={snackbarMessage}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      />
+    </div>
   );
 };
-
-export async function getServerSideProps() {
-  const res = await fetch("http://localhost:3000/api/posts");
-  const posts = await res.json();
-
-  return {
-    props: { posts },
-  };
-}
 
 export default Login;

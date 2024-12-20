@@ -182,7 +182,14 @@ export default function Booknow() {
       }
     }
 
- 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!startDate || !endDate || !persons || !fullName || !value || !email) {
+      alert("Please fill in all required fields");
+      return;
+    }
+    writeToDatabase();
+  };
 
   return (
     <div className="container my-5">
@@ -360,7 +367,7 @@ export default function Booknow() {
                   <div className="form-group form-check"></div>
                 </form>
                 <center>
-                  <button onClick={writeToDatabase}
+                  <button onClick={handleSubmit}
                     className="btn btn-block btn-outline-primary confirm-booking-btn"
                   >
                     Confirm Booking
