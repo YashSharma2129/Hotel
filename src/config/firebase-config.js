@@ -4,14 +4,15 @@ import { getAuth } from "firebase/auth";
 import { getDatabase } from "firebase/database";
 // Firebase configuration (make sure to replace these with your own details)
 const firebaseConfig = {
-  apiKey: "AIzaSyBAE3EZUTtwQmCFc4Dyl-Tg7KWEtSTG5jI",
-  authDomain: "hotel-management-78c2a.firebaseapp.com",
-  projectId: "hotel-management-78c2a",
-  storageBucket: "hotel-management-78c2a.firebasestorage.app",
-  messagingSenderId: "250903432765",
-  appId: "1:250903432765:web:ebb36732fe17ccda9e2454",
-  measurementId: "G-4WTRDFZ8YD",
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
 };
+
 
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
